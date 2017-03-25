@@ -10,17 +10,21 @@ type PubnubCommunicator struct {
 	publishChannel chan string
 }
 
-func NewPubnubCommunicator(channelId string) *PubnubCommunicator {
+func NewPubnubCommunicator(channelId string, read, write bool) *PubnubCommunicator {
 	pubnubCommunicator := &PubnubCommunicator{
 		ConcreteObservable: *observerPattern.NewConcreteObservable(),
 		channelId:          channelId,
 		publishChannel:     make(chan string),
 	}
-	go pubnubCommunicator.listenForReads()
-	go publishOnEvent(
-		pubnubCommunicator.channelId,
-		pubnubCommunicator.publishChannel,
-	)
+	if read {
+		go pubnubCommunicator.listenForReads()
+	}
+	if write {
+		go publishOnEvent(
+			pubnubCommunicator.channelId,
+			pubnubCommunicator.publishChannel,
+		)
+	}
 	return pubnubCommunicator
 }
 
